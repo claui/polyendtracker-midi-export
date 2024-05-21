@@ -56,8 +56,3 @@ def main():
 
 
     print(f"Exported text table to {os.path.abspath(output_filename)}")
-
-
-if __name__ == '__main__':
-
-    main()

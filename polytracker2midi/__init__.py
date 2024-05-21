@@ -103,9 +103,3 @@ def main():
             pattern_output_filename = out_folder + "patterns_midi/" + f"pattern_{number_string}.mid"
             midi_exporter.write_midi_file(pattern_output_filename)
             print(f"Exported pattern midi to {os.path.abspath(pattern_output_filename)}")
-
-
-
-if __name__ == '__main__':
-
-    main()

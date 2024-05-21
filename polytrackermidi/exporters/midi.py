@@ -209,14 +209,17 @@ class PatternToMidiExporter(BaseMidiExporter):
                                 # so we going to jsut shorten its duration
                                 arp_note_duration = arp_end_time - arp_note_start_time
 
-                            midi_file.addNote(track=instrument_to_midi_track_map[step.instrument_number],
-                                              channel=channel,
-                                              pitch=PatternToMidiExporter.get_midi_note_value(note),
-                                              time=start_time_offset + arp_note_start_time,
-                                              duration=arp_note_duration,
-                                              # TODO: write velocity fx value if set (needs to be converted to 0...127!!!)
-                                              volume=default_volume,
-                                              )
+                            # Workaround for MIDIUtil, which crashes if a note has a duration of 0.
+                            # See also: https://github.com/MarkCWirt/MIDIUtil/issues/34
+                            if arp_note_duration >= 1 / midi_file.ticks_per_quarternote:
+                                midi_file.addNote(track=instrument_to_midi_track_map[step.instrument_number],
+                                                channel=channel,
+                                                pitch=PatternToMidiExporter.get_midi_note_value(note),
+                                                time=start_time_offset + arp_note_start_time,
+                                                duration=arp_note_duration,
+                                                # TODO: write velocity fx value if set (needs to be converted to 0...127!!!)
+                                                volume=default_volume,
+                                                )
 
                             # increment starting time for the next note
                             arp_note_start_time += arp_note_duration

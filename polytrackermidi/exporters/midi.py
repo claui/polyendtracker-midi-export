@@ -108,7 +108,13 @@ class PatternToMidiExporter(BaseMidiExporter):
             tempo = 60  # In BPM
 
             midi_tracks_count = len(instruments)
-            midi_file = MIDIFile(midi_tracks_count)
+
+            # There is a bug in MIDIUtil that sometimes crashes when a
+            # note played by the same instrument is overlapping with
+            # itself: https://github.com/MarkCWirt/MIDIUtil/issues/34
+            #
+            # As a workaround, skip removing duplicate MIDI events.
+            midi_file = MIDIFile(midi_tracks_count, removeDuplicates=False)
             midi_file.addTempo(track=0, time=0, tempo=self.tempo_bpm)
 
             for i in range(len(instruments)):
@@ -231,13 +237,9 @@ class PatternToMidiExporter(BaseMidiExporter):
                                               )
 
                     else:
-                        # note that there is a bug in MIDIUtil
-                        # that sometimes crashes when a note played by the same
-                        # instrument is overlapping with itself
-                        # https://github.com/MarkCWirt/MIDIUtil/issues/34
-                        # there is also a bug with track numbers/note values overlapping
-                        # that is also described in the same deInterlaveNotes method in MIDIUtil
-
+                        # note that there is a bug in MIDIUtil with track numbers /note values
+                        # overlapping that is described in the deInterlaveNotes method in MIDIUtil:
+                        # https://github.com/MarkCWirt/MIDIUtil/blob/8f858794b03fcbfdd9d689ac39cf0f9a6792e416/src/midiutil/MidiFile.py#L873-L876
 
                         # default case - just a regular single note playing
                         midi_file.addNote(track=instrument_to_midi_track_map[step.instrument_number],
@@ -287,7 +289,7 @@ class SongToMidiExporter(BaseMidiExporter):
         # this should be faster than calling instruments.indexOf()
         instrument_to_midi_track_map = {}
 
-        midi_file = MIDIFile(midi_tracks_count)
+        midi_file = MIDIFile(midi_tracks_count, removeDuplicates=False)
         #FIXME: write bpm to song to get it from there
         midi_file.addTempo(track=0, time=0, tempo=self.song.bpm)
 
